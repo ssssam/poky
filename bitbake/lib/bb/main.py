@@ -234,6 +234,9 @@ class BitBakeConfigParameters(cookerdata.ConfigParameters):
         parser.add_option("-w", "--write-log", help = "Writes the event log of the build to a bitbake event json file. Use '' (empty string) to assign the name automatically.",
                    action = "store", dest = "writeeventlog")
 
+        parser.add_option("", "--export-tasks", help = "Export each task as a script in a given directory.",
+                   action = "store", dest = "export_tasks_dir", default = None)
+
         options, targets = parser.parse_args(argv)
 
         # some environmental variables set also configuration options
