@@ -139,6 +139,7 @@ class CookerConfiguration(object):
         self.dry_run = False
         self.tracking = False
         self.interface = []
+        self.export_tasks_dir = None
 
         self.env = {}
 
@@ -216,6 +217,14 @@ class CookerDataBuilder(object):
         bb.utils.set_context(bb.utils.clean_context())
         bb.event.set_class_handlers(bb.event.clean_class_handlers())
         self.data = bb.data.init()
+
+        if cookercfg.export_tasks_dir:
+            # Exporting the tasks requires exporting the _context dict, and to
+            # do that we need to be able to look at the original values of
+            # overridden variables. The VariableHistory object gives us a way
+            # of doing that.
+            self.tracking = True
+
         if self.tracking:
             self.data.enableTracking()
 

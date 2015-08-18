@@ -1036,6 +1036,17 @@ class RunQueue:
                     depgraph = self.cooker.buildDependTree(self, self.rqdata.taskData)
                     bb.event.fire(bb.event.DepTreeGenerated(depgraph), self.cooker.data)
 
+            ### Hack to dump running order.
+            # This should become its own task, and also reset the runqueue when
+            # complete ...
+            if self.cooker.configuration.export_tasks_dir:
+                dump_dir = self.cooker.configuration.export_tasks_dir
+                schedule_filename = os.path.join(dump_dir, 'run.sh')
+                with open(schedule_filename, 'w') as f:
+                    f.write('# Overall task schedule.\n')
+                    f.write('set -e -x\n')
+                    bb.export.export_task_queue(dump_dir, f, self)
+
         if self.state is runQueueSceneInit:
             dump = self.cooker.configuration.dump_signatures
             if dump:

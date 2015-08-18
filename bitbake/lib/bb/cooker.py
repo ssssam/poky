@@ -34,7 +34,7 @@ from cStringIO import StringIO
 from contextlib import closing
 from functools import wraps
 from collections import defaultdict
-import bb, bb.exceptions, bb.command
+import bb, bb.exceptions, bb.command, bb.export
 from bb import utils, data, parse, event, cache, providers, taskdata, runqueue
 import Queue
 import signal
@@ -155,6 +155,19 @@ class BBCooker:
         signal.signal(signal.SIGTERM, self.sigterm_exception)
         # Let SIGHUP exit as SIGTERM
         signal.signal(signal.SIGHUP, self.sigterm_exception)
+
+        if configuration.export_tasks_dir:
+            python_globals_filename = os.path.join(
+                configuration.export_tasks_dir, 'data.py')
+            with open(python_globals_filename, 'w') as f:
+                f.write('# Global BitBake data.\n')
+                bb.export.export_variables(f, self.data, bb.utils.get_context())
+
+            shell_globals_filename = os.path.join(
+                configuration.export_tasks_dir, 'globals.sh')
+            with open(shell_globals_filename, 'w') as f:
+                f.write('# Global BitBake shell variables.\n')
+                bb.export.export_shell_variables(f, self.data)
 
     def sigterm_exception(self, signum, stackframe):
         if signum == signal.SIGTERM:

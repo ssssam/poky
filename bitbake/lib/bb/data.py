@@ -304,7 +304,6 @@ def emit_func_python(func, o=sys.__stdout__, d = init()):
         if call:
             o.write(func + "(d)" + "\n\n")
 
-    write_func(func, o, True)
     pp = bb.codeparser.PythonParser(func, logger)
     pp.parse_python(d.getVar(func, True))
     newdeps = pp.execs
@@ -322,6 +321,14 @@ def emit_func_python(func, o=sys.__stdout__, d = init()):
                newdeps |= pp.execs
                newdeps |= set((d.getVarFlag(dep, "vardeps", True) or "").split())
         newdeps -= seen
+
+    ### FIXME: Moved to *after* the deps are written to the file, by Sam Thursfield.
+    # Seems this is needed for the dumped 'do_populate_lic' file to actually
+    # work. It was failing because 'find_license_files()' wasn't defined, but
+    # really the definition was just ordered after the first use. Not sure why
+    # this doesn't affect normal execution inside BitBake!
+
+    write_func(func, o, True)
 
 def update_data(d):
     """Performs final steps upon the datastore, including application of overrides"""

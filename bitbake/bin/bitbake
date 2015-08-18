@@ -196,6 +196,9 @@ class BitBakeConfigParameters(cookerdata.ConfigParameters):
         parser.add_option("", "--status-only", help = "Check the status of the remote bitbake server.",
                    action = "store_true", dest = "status_only", default = False)
 
+        parser.add_option("", "--export-tasks", help = "Export each task as a script in a given directory.",
+                   action = "store", dest = "export_tasks_dir", default = None)
+
         options, targets = parser.parse_args(sys.argv)
 
         # some environmental variables set also configuration options
