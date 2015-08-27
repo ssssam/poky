@@ -141,6 +141,9 @@ def export_task_queue(export_dir, schedule_file, runqueue):
     runqueue.scenequeue_covered = set()
     executor = bb.runqueue.RunQueueExecuteTasks(runqueue)
 
+    previous_fn = None
+    previous_taskdata = None
+
     while True:
         task = executor.sched.next()
 
@@ -156,13 +159,21 @@ def export_task_queue(export_dir, schedule_file, runqueue):
 
         taskname = runqueue.rqdata.runq_task[task]
 
-        appends = runqueue.cooker.collection.get_file_appends(fn)
-        # FIXME: I think this is really slow, maybe we can avoid doing
-        # it so much. I got the idea from 'bitbake-worker' which does it
-        # before building, but it might not be necessary when in the
-        # cooker (server) process.
-        taskdata = bb.cache.Cache.loadDataFull(
-            fn, appends, runqueue.cooker.data)
+        if previous_fn == fn:
+            # Reuse the previous taskdata if possible, to avoid reparsing. This
+            # should give a speed boost, without breaking things.
+            # Since we use the 'completion' scheduler, we normally get all
+            # tasks from one file, then all tasks from the next file, and so
+            # on. So we only need to cache one set of task data, really.
+            taskdata = previous_taskdata
+        else:
+            appends = runqueue.cooker.collection.get_file_appends(fn)
+            # FIXME: I think this is really slow, maybe we can avoid doing
+            # it so much. I got the idea from 'bitbake-worker' which does it
+            # before building, but it might not be necessary when in the
+            # cooker (server) process.
+            taskdata = bb.cache.Cache.loadDataFull(
+                fn, appends, runqueue.cooker.data)
         taskdata = bb.build._task_data(fn, taskname, taskdata)
 
         packagename = taskdata.getVar('PN', True)
@@ -191,6 +202,9 @@ def export_task_queue(export_dir, schedule_file, runqueue):
 
         executor.runq_running[task] = 1
         executor.task_complete(task)
+
+        previous_fn = fn
+        previous_taskdata = taskdata
 
 
 def export_python_task(f, taskname, task_data):
