@@ -300,7 +300,7 @@ def dump_this_task(outfile, d):
     import bb.parse
     fn = d.getVar("BB_FILENAME", True)
     task = "do_" + d.getVar("BB_CURRENTTASK", True)
-    bb.parse.siggen.dump_sigtask(fn, task, outfile, "customfile")
+    #bb.parse.siggen.dump_sigtask(fn, task, outfile, "customfile")
 
 def clean_basepath(a):
     b = a.rsplit("/", 2)[1] + a.rsplit("/", 2)[2]
