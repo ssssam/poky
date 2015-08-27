@@ -320,6 +320,12 @@ def export_shell_task(f, taskname, task_data):
     # avoid bb.data.emit_func() emitting the shared variables, modifying
     # 'task_data' is really difficult and will break things.
 
+    func = task_data.getVar(taskname)
+
+    if len(func.strip()) == 0:
+        f.write('# %s is an empty function\n' % taskname)
+        return
+
     flags = task_data.getVarFlags(taskname)
 
     cleandirs = flags.get('cleandirs')
